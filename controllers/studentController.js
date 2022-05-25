@@ -8,7 +8,9 @@ const firestore = firebase.firestore();
 const addStudent = async (req, res, next) => {
     try{
         const data = req.body;
-        await firestore.collection('students').doc().set(data);
+        const id = data.id;
+        delete data.id;
+        await firestore.collection('students').doc(id).set(data);
         res.send('Record saved successfully');
         console.log(data);
     } catch (error){
