@@ -8,8 +8,8 @@ const firestore = firebase.firestore();
 const addEducator = async (req, res, next) => {
     try{
         const data = req.body;
-        const id = data.id;
-        delete data.id;
+        const id = data.userId;
+        delete data.userId;
         await firestore.collection('educators').doc(id).set(data);
         res.send('Record saved successfully');
         console.log(data);
@@ -42,6 +42,27 @@ const getEducator = async (req, res, next) => {
         res.status(400).send(error.message);
     }
 }
+// This function does not work (yet?)
+const getEducatorStudentsData = async (req, res, next) => {
+    try{
+        const id = req.params.id;
+        const educator = await firestore.collection('educators').doc(id);
+        const data = await educator.get();
+        const students = data.data().studentIds;
+        var studentJson = [];
+        console.log(students);
+        students.forEach(async(student) => {
+            const snapshot = await firestore.collection("students").where("userId", "==", student).get();
+            snapshot.forEach((doc) => {
+                studentJson.push(doc.data());
+                console.log(studentJson);
+            });
+        });
+        res.send(studentJson);
+    } catch (error){
+        res.status(400).send(error.message);
+    }
+} 
 
 const updateEducator = async (req, res, next) => {
     try{
@@ -49,6 +70,49 @@ const updateEducator = async (req, res, next) => {
         const data = req.body;
         const educator = await firestore.collection('educators').doc(id);
         await educator.update(data);
+        res.send('Educator record updated successfully');
+    } catch (error){
+        res.status(400).send(error.message);
+    }
+}
+
+const addEducatorStudentIds = async (req, res, next) => {
+    try{
+        //res.send(data.data());
+        const id = req.params.id;
+        const newData = req.body;
+        const educator = await firestore.collection('educators').doc(id);
+        const existingData = await educator.get();
+        //console.log(existingData.data());
+        const newStudentIds = existingData.data().studentIds.concat(newData.studentIds);
+        const updatedData = {
+            "studentIds": newStudentIds
+        }
+        console.log(updatedData);
+        await educator.update(updatedData);
+        res.send('Educator record updated successfully');
+    } catch (error){
+        res.status(400).send(error.message);
+    }
+}
+
+const deleteEducatorStudentIds = async (req, res, next) => {
+    try{
+        const id = req.params.id;
+        const removeData = req.body;
+        const educator = await firestore.collection('educators').doc(id);
+        const existingData = await educator.get();
+        const existingDataArray = existingData.data().studentIds;
+        removeData.studentIds.forEach((item) => { 
+            existingDataArray.splice(existingDataArray.indexOf(item), 1)
+        })
+        const newStudentIds = existingDataArray;
+        const updatedData = {
+            "studentIds": newStudentIds
+        }
+        console.log(newStudentIds);
+        console.log(updatedData);
+        await educator.update(updatedData);
         res.send('Educator record updated successfully');
     } catch (error){
         res.status(400).send(error.message);
@@ -69,6 +133,9 @@ module.exports = {
     addEducator,
     getAllEducators,
     getEducator,
+    getEducatorStudentsData,
     updateEducator,
+    addEducatorStudentIds,
+    deleteEducatorStudentIds,
     deleteEducator
 }

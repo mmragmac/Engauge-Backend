@@ -8,8 +8,8 @@ const firestore = firebase.firestore();
 const addStudent = async (req, res, next) => {
     try{
         const data = req.body;
-        const id = data.id;
-        delete data.id;
+        const id = data.userId;
+        delete data.userId;
         await firestore.collection('students').doc(id).set(data);
         res.send('Record saved successfully');
         console.log(data);
@@ -43,6 +43,38 @@ const getStudent = async (req, res, next) => {
     }
 }
 
+const getStudentCanWatch = async (req, res, next) =>{
+    try{
+        const id = req.params.id;
+        const student = await firestore.collection('students').doc(id);
+        const data = await student.get();
+        if (!data.exists){
+            res.status(404).send('Student with the given ID not found');
+        }else {
+            res.send(data.data().canWatch);
+        }
+    } catch (error){
+        res.status(400).send(error.message);
+    }
+    
+}
+
+const getStudentRecentlyWatched = async (req, res, next) =>{
+    try{
+        const id = req.params.id;
+        const student = await firestore.collection('students').doc(id);
+        const data = await student.get();
+        if (!data.exists){
+            res.status(404).send('Student with the given ID not found');
+        }else {
+            res.send(data.data().recentlyWatched);
+        }
+    } catch (error){
+        res.status(400).send(error.message);
+    }
+    
+}
+
 const updateStudent = async (req, res, next) => {
     try{
         const id = req.params.id;
@@ -69,6 +101,8 @@ module.exports = {
     addStudent,
     getAllStudents,
     getStudent,
+    getStudentCanWatch,
+    getStudentRecentlyWatched,
     updateStudent,
     deleteStudent
 }
