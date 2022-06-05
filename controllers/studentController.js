@@ -18,6 +18,36 @@ const addStudent = async (req, res, next) => {
     }
 }
 
+const addStudentData = async (req, res, next) => {
+    try{
+        const id = req.params.id;
+        const newData = req.body;
+        const student = await firestore.collection('students').doc(id);
+        const existingData = await student.get();
+        console.log(existingData.data().userData);
+        const i = existingData.data().userData.findIndex((item) => { 
+            return item.storyID == newData.userData.storyID;
+        });
+        if (i > -1){
+            const newStudentData = existingData.data().userData[i].storyData.concat(newData.userData.storyData);
+            console.log(newStudentData);
+            var updatedData = existingData.data();
+            updatedData.userData[i].storyData = newStudentData;
+            console.log(updatedData.userData);
+            await student.update(updatedData);
+            res.send('Student record updated successfully');
+        }else{
+            const newStudentData = newData.userData;
+            var updatedData = existingData.data();
+            updatedData.userData.push(newStudentData);
+            await student.update(updatedData);
+            res.send('Student record updated successfully');
+        }
+    } catch (error){
+        res.status(400).send(error.message);
+    }
+}
+
 const getAllStudents = async(req, res, next) => {
     try {
         const students = await firestore.collection('students').get();
@@ -59,6 +89,48 @@ const getStudentCanWatch = async (req, res, next) =>{
     
 }
 
+const addStudentCanWatch = async (req, res, next) => {
+    try{
+        const id = req.params.id;
+        const newData = req.body;
+        const student = await firestore.collection('students').doc(id);
+        const existingData = await student.get();
+        console.log(existingData.data());
+        const newStories = existingData.data().canWatch.concat(newData.canWatch);
+        const updatedData = {
+            "canWatch": newStories
+        }
+        console.log(updatedData);
+        await student.update(updatedData);
+        res.send('Student record updated successfully');
+    } catch (error){
+        res.status(400).send(error.message);
+    }
+}
+
+const deleteStudentCanWatch = async (req, res, next) => {
+    try{
+        const id = req.params.id;
+        const removeData = req.body;
+        const student = await firestore.collection('students').doc(id);
+        const existingData = await student.get();
+        const existingDataArray = existingData.data().canWatch;
+        removeData.canWatch.forEach((item) => { 
+            existingDataArray.splice(existingDataArray.indexOf(item), 1)
+        })
+        const newStories = existingDataArray;
+        const updatedData = {
+            "canWatch": newStories
+        }
+        console.log(newStories);
+        console.log(updatedData);
+        await student.update(updatedData);
+        res.send('Student record updated successfully');
+    } catch (error){
+        res.status(400).send(error.message);
+    }
+}
+
 const getStudentRecentlyWatched = async (req, res, next) =>{
     try{
         const id = req.params.id;
@@ -73,6 +145,54 @@ const getStudentRecentlyWatched = async (req, res, next) =>{
         res.status(400).send(error.message);
     }
     
+}
+
+const addStudentRecentlyWatched = async (req, res, next) => {
+    try{
+        const id = req.params.id;
+        const newData = req.body;
+        const student = await firestore.collection('students').doc(id);
+        const existingData = await student.get();
+        console.log(existingData.data());
+        const newStories = existingData.data().recentlyWatched.concat(newData.recentlyWatched);
+        const updatedData = {
+            "recentlyWatched": newStories
+        }
+        console.log(updatedData);
+        if (updatedData.recentlyWatched.length > 3){
+            console.log(updatedData.recentlyWatched)
+            while ( updatedData.recentlyWatched.length > 3){
+                updatedData.recentlyWatched.shift();
+            }
+        }
+        await student.update(updatedData);
+        res.send('Student record updated successfully');
+    } catch (error){
+        res.status(400).send(error.message);
+    }
+}
+
+const deleteStudentRecentlyWatched = async (req, res, next) => {
+    try{
+        const id = req.params.id;
+        const removeData = req.body;
+        const student = await firestore.collection('students').doc(id);
+        const existingData = await student.get();
+        const existingDataArray = existingData.data().recentlyWatched;
+        removeData.recentlyWatched.forEach((item) => { 
+            existingDataArray.splice(existingDataArray.indexOf(item), 1)
+        })
+        const newStories = existingDataArray;
+        const updatedData = {
+            "recentlyWatched": newStories
+        }
+        console.log(newStories);
+        console.log(updatedData);
+        await student.update(updatedData);
+        res.send('Student record updated successfully');
+    } catch (error){
+        res.status(400).send(error.message);
+    }
 }
 
 const updateStudent = async (req, res, next) => {
@@ -99,10 +219,15 @@ const deleteStudent = async (req, res, next) => {
 
 module.exports = {
     addStudent,
+    addStudentData,
     getAllStudents,
     getStudent,
     getStudentCanWatch,
+    addStudentCanWatch,
+    deleteStudentCanWatch,
     getStudentRecentlyWatched,
+    addStudentRecentlyWatched,
+    deleteStudentRecentlyWatched,
     updateStudent,
     deleteStudent
 }
