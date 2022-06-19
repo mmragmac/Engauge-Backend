@@ -129,6 +129,64 @@ const deleteEducator = async (req, res, next) => {
     }
 }
 
+const getEducatorUploaded = async (req, res, next) =>{
+    try{
+        const id = req.params.id;
+        const educator = await firestore.collection('educators').doc(id);
+        const data = await educator.get();
+        if (!data.exists){
+            res.status(404).send('Educator with the given ID not found');
+        }else {
+            res.send(data.data().canWatch);
+        }
+    } catch (error){
+        res.status(400).send(error.message);
+    }
+    
+}
+
+const addEducatorUploaded = async (req, res, next) => {
+    try{
+        const id = req.params.id;
+        const newData = req.body;
+        const educator = await firestore.collection('educators').doc(id);
+        const existingData = await educator.get();
+        console.log(existingData.data());
+        const newStories = existingData.data().storiesUploaded.concat(newData.storiesUploaded);
+        const updatedData = {
+            "storiesUploaded": newStories
+        }
+        console.log(updatedData);
+        await educator.update(updatedData);
+        res.send('Educator record updated successfully');
+    } catch (error){
+        res.status(400).send(error.message);
+    }
+}
+
+const deleteEducatorUploaded = async (req, res, next) => {
+    try{
+        const id = req.params.id;
+        const removeData = req.body;
+        const educator = await firestore.collection('educators').doc(id);
+        const existingData = await educator.get();
+        const existingDataArray = existingData.data().storiesUploaded;
+        removeData.storiesUploaded.forEach((item) => { 
+            existingDataArray.splice(existingDataArray.indexOf(item), 1)
+        })
+        const newStories = existingDataArray;
+        const updatedData = {
+            "storiesUploaded": newStories
+        }
+        console.log(newStories);
+        console.log(updatedData);
+        await educator.update(updatedData);
+        res.send('Educator record updated successfully');
+    } catch (error){
+        res.status(400).send(error.message);
+    }
+}
+
 module.exports = {
     addEducator,
     getAllEducators,
@@ -137,5 +195,8 @@ module.exports = {
     updateEducator,
     addEducatorStudentIds,
     deleteEducatorStudentIds,
-    deleteEducator
+    deleteEducator,
+    getEducatorUploaded,
+    addEducatorUploaded,
+    deleteEducatorUploaded
 }

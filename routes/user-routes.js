@@ -3,7 +3,9 @@ const {addUser,
        getAllUsers, 
        getUser,
        updateUser,
-       deleteUser
+       deleteUser,
+       putProfilePicture,
+       getProfilePicture
       } = require('../controllers/userController');
 
 const router = express.Router();
@@ -11,7 +13,9 @@ const router = express.Router();
 router.post('/user', addUser);
 router.get('/users', getAllUsers)
 router.get('/user/:id', getUser);
+router.get('/user/:id/get_profile_picture', getProfilePicture);
 router.put('/user/:id', updateUser);
+router.put('/user/:id/add_profile_picture', putProfilePicture);
 router.delete('/user/:id', deleteUser);
 
 module.exports = {

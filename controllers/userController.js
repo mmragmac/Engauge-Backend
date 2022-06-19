@@ -4,6 +4,11 @@ const res = require('express/lib/response');
 const firebase = require('../db');
 //const User = require('../models/user');
 const firestore = firebase.firestore();
+const storage = firebase.storage();
+
+var storageRef = storage.ref();
+const dpFolderRef = storageRef.child('profilePics');
+
 
 const addUser = async (req, res, next) => {
     try{
@@ -65,10 +70,44 @@ const deleteUser = async (req, res, next) => {
     }
 }
 
+const getProfilePicture = async (req, res, next) => {
+    try{
+        const id = req.params.id;
+        const profilePicRef = storageRef.child('profilePics/' + id);
+        profilePicRef.getDownloadURL()
+            .then((url) => {
+                res.send({
+                    "file": url
+                });
+            });
+    } catch (error){
+        res.status(400).send(error.message);
+    }
+}
+
+const putProfilePicture  = async (req, res, next) => {
+    try{
+        const id = req.params.id;
+        const fileName = id;
+        const profilePicRef = dpFolderRef.child(fileName);
+        profilePicRef.putString(req.body.file, 'base64').then((snapshot) => {
+            console.log('Profile picture updated');
+        });
+        res.send('Profile picture updated successfully');
+    } catch (error){
+        res.status(400).send(error.message);
+    }
+}
+
+
+
+
 module.exports = {
     addUser,
     getAllUsers,
     getUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    putProfilePicture,
+    getProfilePicture
 }
