@@ -77,7 +77,7 @@ const getProfilePicture = async (req, res, next) => {
         profilePicRef.getDownloadURL()
             .then((url) => {
                 res.send({
-                    "file": url
+                    "url": url
                 });
             });
     } catch (error){
