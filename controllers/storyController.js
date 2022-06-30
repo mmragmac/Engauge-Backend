@@ -13,7 +13,6 @@ const addStory = async (req, res, next) => {
           const id = docRef.id;
           res.json(id);
         });
-        res.send('Record saved successfully');
         console.log(data);
     } catch (error){
         res.status(400).send(error.message);
