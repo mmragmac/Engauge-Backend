@@ -8,8 +8,12 @@ const firestore = firebase.firestore();
 const addStory = async (req, res, next) => {
     try{
         const data = req.body;
-        await firestore.collection('stories').doc().set(data);
-        res.send('Record saved successfully');
+        await firestore.collection('stories').add(data)
+        .then((docRef) => {
+          const id = docRef.id;
+          res.json(id);
+        });
+        // res.send('Record saved successfully');
         console.log(data);
     } catch (error){
         res.status(400).send(error.message);
