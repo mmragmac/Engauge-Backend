@@ -24,25 +24,21 @@ const addStudentData = async (req, res, next) => {
         const newData = req.body;
         const student = await firestore.collection('students').doc(id);
         const existingData = await student.get();
-        console.log(existingData.data().userData);
-        const i = existingData.data().userData.findIndex((item) => { 
-            return item.storyID == newData.userData.storyID;
-        });
-        if (i > -1){
-            const newStudentData = existingData.data().userData[i].storyData.concat(newData.userData.storyData);
-            console.log(newStudentData);
-            var updatedData = existingData.data();
-            updatedData.userData[i].storyData = newStudentData;
-            console.log(updatedData.userData);
-            await student.update(updatedData);
-            res.send('Student record updated successfully');
+        var updatedData = existingData.data();
+
+        const storyId = newData.storyId;
+        delete newData.storyId;
+
+        if(storyId in updatedData.storyData){
+            updatedData.storyData[storyId].push(newData);
         }else{
-            const newStudentData = newData.userData;
-            var updatedData = existingData.data();
-            updatedData.userData.push(newStudentData);
-            await student.update(updatedData);
-            res.send('Student record updated successfully');
+            updatedData.storyData[storyId] = [newData];
         }
+
+        console.log(updatedData);
+        await student.update(updatedData);
+        res.send('Student record updated successfully');
+
     } catch (error){
         res.status(400).send(error.message);
     }
