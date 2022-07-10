@@ -29,6 +29,12 @@ const addStudentData = async (req, res, next) => {
         const storyId = newData.storyId;
         delete newData.storyId;
 
+        if (!("storyData" in updatedData)){
+            updatedData = {
+                "storyData": {}
+            }
+        }
+
         if(storyId in updatedData.storyData){
             updatedData.storyData[storyId].push(newData);
         }else{
