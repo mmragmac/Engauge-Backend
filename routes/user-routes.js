@@ -5,7 +5,8 @@ const {addUser,
        updateUser,
        deleteUser,
        putProfilePicture,
-       getProfilePicture
+       getProfilePicture,
+       updateReminder
       } = require('../controllers/userController');
 
 const router = express.Router();
@@ -16,6 +17,7 @@ router.get('/user/:id', getUser);
 router.get('/user/:id/get_profile_picture', getProfilePicture);
 router.put('/user/:id', updateUser);
 router.put('/user/:id/add_profile_picture', putProfilePicture);
+router.put('/user/:id/reminder', updateReminder);
 router.delete('/user/:id', deleteUser);
 
 module.exports = {

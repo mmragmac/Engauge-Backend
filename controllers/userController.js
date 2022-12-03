@@ -79,6 +79,18 @@ const getProfilePicture = async (req, res, next) => {
                 res.send({
                     "url": url
                 });
+            })
+            .catch((error) => {
+                // A full list of error codes is available at
+                // https://firebase.google.com/docs/storage/web/handle-errors
+                switch (error.code) {
+                  case 'storage/object-not-found':
+                    // File doesn't exist
+                    res.send({
+                        "url": ""
+                    });
+                    break;
+                }
             });
     } catch (error){
         res.status(400).send(error.message);
@@ -99,8 +111,20 @@ const putProfilePicture  = async (req, res, next) => {
     }
 }
 
-
-
+const updateReminder = async (req, res, next) => {
+    try{
+        const id = req.params.id;
+        const user = await firestore.collection('users').doc(id);
+        const updatedData = {
+            "reminder": false
+        }
+        await user.update(updatedData);
+        //await user.update(data);
+        res.send('Reminder flag updated successfully');
+    } catch (error){
+        res.status(400).send(error.message);
+    }
+}
 
 module.exports = {
     addUser,
@@ -109,5 +133,6 @@ module.exports = {
     updateUser,
     deleteUser,
     putProfilePicture,
-    getProfilePicture
+    getProfilePicture,
+    updateReminder
 }

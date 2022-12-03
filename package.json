@@ -23,7 +23,8 @@
     "express": "^4.17.3",
     "firebase": "^8.10.1",
     "firebase-functions": "^3.22.0",
-    "firebase-tools": "^11.2.1",
+    "firebase-login": "^1.0.0",
+    "firebase-tools": "^11.8.0",
     "login": "^0.8.0",
     "nodemon": "^2.0.15"
   }

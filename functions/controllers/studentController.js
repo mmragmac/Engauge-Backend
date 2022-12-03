@@ -77,9 +77,31 @@ const getStudent = async (req, res, next) => {
 
 const getStudentCanWatch = async (req, res, next) =>{
     try{
+        const stories = await firestore.collection('stories').get();
+        const storyData = stories.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+
         const id = req.params.id;
-        const student = await firestore.collection('students').doc(id);
-        const data = await student.get();
+        let student = await firestore.collection('students').doc(id);
+        let data = await student.get();
+        const studentData = data.data();
+        const updatedStudentCanWatch = [];
+
+        for (let i of studentData.canWatch){
+            if(i !== ""){
+                if (storyData.some((obj) => {
+                    return obj.id == i
+                })){
+                    updatedStudentCanWatch.push(i)
+                }
+            }
+        }
+        const updatedData = {
+            "canWatch": updatedStudentCanWatch
+        }
+        await student.update(updatedData);
+        
+        student = await firestore.collection('students').doc(id);
+        data = await student.get();
         if (!data.exists){
             res.status(404).send('Student with the given ID not found');
         }else {
